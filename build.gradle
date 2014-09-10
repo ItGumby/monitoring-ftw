@@ -36,7 +36,7 @@ task download << {
 asciidoctor {
     sourceDir = new File('src/asciidoc')
     outputDir = outDir
-    backends = ['html5']
+    backends = ['deckjs']
 
     options = [
         template_dirs : ["${templateDir}/haml".toString()],
@@ -64,7 +64,7 @@ asciidoctor {
 asciidoctor.dependsOn 'copyDeckJs'
 
 task copyDeckJs( type : Copy ) {
-    from ('build/downloads') {
+    from (downloadDir) {
         include 'deck.js/**'
     }
     into outDir
