@@ -261,19 +261,35 @@ Alert from Manager (Searches & Reports.Manage Searches & Reports, filter & selec
 TIP: if dashboard is scheduled (ie email distribution), then ensure each search completes in less than a minute.
 
 
-== Splunk in Practice
+== Splunk in Practice: Real-time traffic
+
+image::Splunk-trafficDashboard.png[live traffic across apaches, dispatchers]
+
+* "Load Balancer View" (used during deploys to watch traffic across all nodes)
+* http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/webcms_real_time_traffic[Webcms Real Time Traffic]
+
+
+== Splunk in Practice: Top CQ5 Exceptions
 
 * http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/flashtimeline?s=%2FservicesNS%2Fnobody%2Fsearch%2Fsaved%2Fsearches%2FCQ5%2520Top%2520Publish%2520Exceptions[CQ5 Top Publish Exceptions]
 ** Exploration query: what is happening
 ** Killed exception #1: `IllegalStateException: page needs a session` (was up to 85% of old exceptions)
 ** Can focus on most frequent exceptions
 ** or focus on rare, but "shouldn't happen" ones
-* http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/webcms_real_time_traffic[Webcms Real Time Traffic]
-** "Load Balancer View" (used during deploys to watch traffic across all nodes)
-** http://images/Splunk-trafficDashboard.png[live traffic across apaches, dispatchers]
+
+
+== Splunk in Practice: Checkout Error Dashboard
+
+image::Splunk-CheckoutDashboard.jpg[specific errors grouped]
+
+* scheduled daily email to our business groups
+* iterated with business, including breaking out certain errors & time-frame
 * http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/webcms_checkout[Webcms Checkout - last 24 hours]
-** scheduled daily email to our business groups
-** iterated with business, including breaking out certain errors & time-frame
-** http://images/Splunk-CheckoutDashboard.png[specific errors grouped]
+
+
+== Splunk in Practice: live demo
+
+(if wifi works)
+
 * walk through recent slow-downs
 ** blah
