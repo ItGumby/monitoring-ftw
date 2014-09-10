@@ -31,6 +31,7 @@ task download << {
                 deckjsDir, recursive:true, overwrite:true
     }
 }
+download.onlyIf { !deckjsDir.exists() || !templateDir.exists() }
 
 // Asciidoctor task needs to know where deck.js template is located
 asciidoctor {
@@ -62,6 +63,7 @@ asciidoctor {
 
 // Completed slide deck needs to have deck.js included
 asciidoctor.dependsOn 'copyDeckJs'
+asciidoctor.dependsOn 'download'
 
 task copyDeckJs( type : Copy ) {
     from (downloadDir) {
