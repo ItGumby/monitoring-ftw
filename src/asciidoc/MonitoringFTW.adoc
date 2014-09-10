@@ -1,5 +1,8 @@
 = Monitoring FTW
 :author: Brian Street
+:backend: deckjs
+:deckjs_theme: web-2.0
+:deckjs_transition: horizontal-slide
 :navigation:
 :goto:
 :menu:
@@ -7,26 +10,28 @@
 :icons: font
 :github: pass:[<i class="fa fa-github"></i>]
 :twitter: pass:[<i class="fa fa-twitter"></i>]
+:source-hightlighter: CodeRay
 
-
-Z-Conf slot: 10am Thurs 2014-SEP-11
 
 == Agenda
 
-* What is Monitoring
+* What is Monitoring?
 * Tools
-** Splunk (unified log scraping)
+** Unix text tools
 ** AppDynamics (instrumented java: cross app/aggregate)
+** Splunk (unified log scraping)
 * Basic Splunk
-** Queries
+** Concepts
+** Topology
+** Search Interface
+** Search fields
 ** Transforming Data
-** Representations (events vs tables/charts/etc)
+** Visualizations (events vs tables/charts/etc)
+** recommended optimizations
 * Advanced Splunk
 ** Alerts
 ** Dashboards
-* AppDynamics
-** Business Transactions
-** Aggregate Thresholds
+* Splunk in Practice
 
 == Introduction
 
@@ -81,18 +86,20 @@ TIP: MIP (Monitoring Implementation Plan)
 ** ie `grep`, `sed`, `awk`
 ** very capable, but require understanding, effort
 ** better at single files, instances
-* *Splunk*
-** "unified log scraping" (my words)
-** any log file, any platform
-** fowarder(s) -> indexer(s) -> search head
-** TWC has licenses & multiple instances
 * *AppDynamics*
 ** "monitoring by instrumented java"
+** Business Transactions
+** Aggregate Thresholds
 ** Excels at application boundaries (host & JVM metrics, remote calls)
 ** Automatic Timing (of remote calls)
 ** Deeper inspection of sampled calls (randomly or triggered by condition)
 ** `-javaagent:.../javaagent.jar` -> hosted AppDynamics server
 ** warning: Adobe Flash interface
+* *Splunk*
+** "unified log scraping" (my words)
+** any log file, any platform
+** fowarder(s) -> indexer(s) -> search head
+** TWC has licenses & multiple instances
 
 == Basic Splunk: Topology
 
@@ -181,7 +188,7 @@ NOTE: while typing in a search, the UI will attempt to display relavant hints
 image::images/Splunk-searchHints.png[Splunk search hints]
 
 
-== Splunk Representations
+== Splunk Visualizations
 
 Sometimes you want summary data instead of the raw events or fields.
 
@@ -213,7 +220,7 @@ Sometimes you want summary data instead of the raw events or fields.
 
 (Based on Splunk's Quick Reference Guide)
 
-* make searches as specific as possible (eg `fatal_error`, not `*error*`)
+* make searches as specific as possible (eg `fatal_error`, not `\*error\*`)
 * limit time range (eg `-1h` instead of `-1w`)
 * filter out unneeded fields asap
 * filter out results before calculations
