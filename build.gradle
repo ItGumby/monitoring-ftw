@@ -42,7 +42,7 @@ asciidoctor {
     options = [
         template_dirs : ["${projectDir}/asciidoctor-backends/haml".toString()],
         attributes : [
-            'imagesdir' : new File(buildDir, 'src/images'),
+            'imagesdir' : new File('.'),
             'source-highligher': 'coderay',
             'deckjs_theme': 'web-2.0', // 'web-2.0' , 'swiss', 'neon'
             'deckjs_transition': 'horizontal-slide', // 'fade', 'horizontal-slide' , 'vertical-slide'
