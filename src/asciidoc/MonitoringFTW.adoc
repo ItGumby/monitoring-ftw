@@ -2,8 +2,6 @@
 :author: Brian Street
 :github: pass:[<i class="fa fa-github"></i>]
 :twitter: pass:[<i class="fa fa-twitter"></i>]
-:source-hightlighter: CodeRay
-
 
 == Agenda
 
@@ -27,7 +25,7 @@
 
 == Introduction
 
-image::itgumby.jpeg[GitHub Avatar]
+image::https://avatars3.githubusercontent.com/u/1299690?s=460[GitHub Avatar]
 
 Brian Street (https://github.com/ItGumby[{github}ItGumby] https://twitter.com/ItGumby[{twitter}ItGumby])
 

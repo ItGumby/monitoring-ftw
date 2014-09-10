@@ -15,7 +15,6 @@ apply plugin: 'vfs' // NOTE: We still using old-style. From 0.6+ this will be or
 apply plugin: 'org.asciidoctor.gradle.asciidoctor'
 
 ext {
-    asciidoctorBackendVersion = '0.1.4'
     downloadDir = new File(buildDir,'downloads')
     templateDir = new File(downloadDir,'asciidoctor-backends')
     deckjsDir   = new File(downloadDir,'deck.js')
@@ -26,7 +25,7 @@ ext {
 task download << {
     mkdir downloadDir
     vfs {
-        cp "zip:https://github.com/asciidoctor/asciidoctor-backends/archive/asciidoctor-v${asciidoctorBackendVersion}.zip!asciidoctor-backends-asciidoctor-v${asciidoctorBackendVersion}",
+        cp "zip:https://github.com/asciidoctor/asciidoctor-backends/archive/master.zip!asciidoctor-backends-master",
                 templateDir, recursive:true, overwrite:true
         cp "zip:https://github.com/imakewebthings/deck.js/archive/master.zip!deck.js-master",
                 deckjsDir, recursive:true, overwrite:true
@@ -40,9 +39,9 @@ asciidoctor {
     backends = ['html5']
 
     options = [
-        template_dirs : ["${projectDir}/asciidoctor-backends/haml".toString()],
+        template_dirs : ["${templateDir}/haml".toString()],
         attributes : [
-            'imagesdir' : new File('images'),
+            //'imagesdir': './images',
             'source-highligher': 'coderay',
             'backend': 'deckjs',
             'deckjs_theme': 'web-2.0', // 'web-2.0' , 'swiss', 'neon'
@@ -51,11 +50,10 @@ asciidoctor {
             'goto':'',
             'menu':'',
             'status':'',
-            'split':'',
             'blank':'',
             'icons':'font',
             //'customcss': 'css/custom.css',
-            'viewport': 'width=1000, user-scalable=yes',
+            //'viewport': 'width=1000, user-scalable=yes',
             'sectids!': '',
             'showtitle':''
         ]
