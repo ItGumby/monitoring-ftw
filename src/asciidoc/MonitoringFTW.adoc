@@ -46,7 +46,7 @@ TIP: http://www.merriam-webster.com/dictionary/monitor[monitor] (verb) "to watch
 * Is it [app, server, ...] working?
 * Automate the boring parts of your jobs away
 * Is it possible to catch __ ahead of time?
-* *Business Buzzwords*
+* Business Buzzwords
 ** "machine data"
 ** "operational intelligence"
 
@@ -270,10 +270,10 @@ TIP: if dashboard is scheduled (ie email distribution), then ensure each search 
 ** or focus on rare, but "shouldn't happen" ones
 * http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/webcms_real_time_traffic[Webcms Real Time Traffic]
 ** "Load Balancer View" (used during deploys to watch traffic across all nodes)
-** image::Splunk-trafficDashboard.png[live traffic across apaches, dispatchers]
+** http://images/Splunk-trafficDashboard.png[live traffic across apaches, dispatchers]
 * http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/webcms_checkout[Webcms Checkout - last 24 hours]
-** image::Splunk-CheckoutDashboard.png[specific errors grouped]
 ** scheduled daily email to our business groups
 ** iterated with business, including breaking out certain errors & time-frame
+** http://images/Splunk-CheckoutDashboard.png[specific errors grouped]
 * walk through recent slow-downs
 ** blah
