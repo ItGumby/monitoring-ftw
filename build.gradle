@@ -71,3 +71,11 @@ task copyDeckJs( type : Copy ) {
     }
     into outDir
 }
+
+task gitHubPages(type : Copy) {
+    from outDir
+    into projectDir
+
+    rename(/.*\.html/, 'index.html')
+}
+gitHubPages.dependsOn 'asciidoctor'
