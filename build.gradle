@@ -41,7 +41,7 @@ asciidoctor {
     options = [
         template_dirs : ["${templateDir}/haml".toString()],
         attributes : [
-            //'imagesdir': './images',
+            'imagesdir': 'images',
             'source-highligher': 'coderay',
             'backend': 'deckjs',
             'deckjs_theme': 'web-2.0', // 'web-2.0' , 'swiss', 'neon'
