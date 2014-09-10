@@ -38,6 +38,12 @@ asciidoctor {
     backends = ['html5']
     options = [
         'template_dir' : "${projectDir}/external/asciidoctor-backends/haml/deckjs",
+        'template_engine' : 'haml',
+        'header_footer' : true,
+        'attributes' : [
+            'imagesdir' : new File(buildDir, 'resources/images'),
+            'customcss' : new File(buildDir, 'resources/custom.css')
+        ]
     ]
     outputDir = outDir
 }
