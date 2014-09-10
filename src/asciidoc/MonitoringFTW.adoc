@@ -1,0 +1,281 @@
+= Monitoring FTW
+:author: Brian Street
+:navigation:
+:goto:
+:menu:
+:status:
+:icons: font
+:github: pass:[<i class="fa fa-github"></i>]
+:twitter: pass:[<i class="fa fa-twitter"></i>]
+
+
+Z-Conf slot: 10am Thurs 2014-SEP-11
+
+== Agenda
+
+* What is Monitoring
+* Tools
+** Splunk (unified log scraping)
+** AppDynamics (instrumented java: cross app/aggregate)
+* Basic Splunk
+** Queries
+** Transforming Data
+** Representations (events vs tables/charts/etc)
+* Advanced Splunk
+** Alerts
+** Dashboards
+* AppDynamics
+** Business Transactions
+** Aggregate Thresholds
+
+== Introduction
+
+image::images/https://avatars3.githubusercontent.com/u/1299690?s=460[GitHub Avatar]
+
+Brian Street (https://github.com/ItGumby[{github}ItGumby] https://twitter.com/ItGumby[{twitter}ItGumby])
+
+* Full Stack Developer on http://www.timewarnercable.com (Alexa Top 3000 and climbing)
+** Residential Phase 1: insource main site to new CMS & design
+** Contributed to push for RWD (Responsive Web Design - same content, multiple devices)
+** EBF Buyflow: insource existing online ordering
+** ABF Buyflow: extend online orders to potential new users
+** Applying lessons from previous projects to new ones
+* flexible engineer with a passion for automation
+* other tech interests: ETL, Databases, (Automated) QA, and Motion Control/robotics
+
+
+== What is Monitoring
+
+TIP: http://www.merriam-webster.com/dictionary/monitor[monitor] (verb) "to watch, observe, listen to or check (something) for a *special purpose* over a period of time"
+
+* Is it [app, server, ...] working?
+* Automate the boring parts of your jobs away
+* Is it possible to catch __ ahead of time?
+* *Business Buzzwords*
+** "machine data"
+** "operational intelligence"
+
+TIP: MIP (Monitoring Implementation Plan)
+
+* Where to start: "Get centralized logging."
+** Pay attention to where _your_ constraints tend to be
+** Only alert on actionable items (to prevent alert fatigue)
+
+
+== Developer Perspective
+
+* Look for expected events (or their absense)
+* Exploring for unexpected events
+* Analyze "shapes" of events
+** grouping vs even distribution
+** frequent vs rare
+** Correlations with other events
+* Sanity check external metrics & analytics
+* Prioritize code effort
+** How is code behaving?
+** How is code performing?
+
+== Tools in use
+
+* Unix text tools
+** ie `grep`, `sed`, `awk`
+** very capable, but require understanding, effort
+** better at single files, instances
+* *Splunk*
+** "unified log scraping" (my words)
+** any log file, any platform
+** fowarder(s) -> indexer(s) -> search head
+** TWC has licenses & multiple instances
+* *AppDynamics*
+** "monitoring by instrumented java"
+** Excels at application boundaries (host & JVM metrics, remote calls)
+** Automatic Timing (of remote calls)
+** Deeper inspection of sampled calls (randomly or triggered by condition)
+** `-javaagent:.../javaagent.jar` -> hosted AppDynamics server
+** warning: Adobe Flash interface
+
+== Basic Splunk: Topology
+
+forwarder -> indexer -> search head
+
+* *forwarder* streams (log) files to (central) indexers
+* *indexer* indexes data for optimized searching, especially over time
+** (I/O intensive)
+** manage permissions based on index
+** generally striped not mirrored
+* *search head* Provides UI
+** Runs queries against indexers.
+** Data manipulations happen at search time (leaving indexed events alone)
+* Anticipate multiple forwarders & indexers; Can have separate search heads.
+* *License Server* authorizes indexers, search heads
+* Can run locally! http://www.splunk.com/download[Splunk Downloads]
+
+image::images/Splunk-topology.png[Splunk topology]
+
+== Basic Splunk Concepts
+
+* processing: index-time vs search-time (translate events only as needed)
+* events: single entry of data
+* fields: name/value pairs extracted from event data
+* tags: aliases to field values
+* eventtypes
+* reports/dashboards
+* apps
+* permissions/users/roles
+* transactions: group related events together for easier analysis
+
+
+== Basic Splunk: Interface
+
+image::images/Splunk-UI.png[Splunk Interface]
+
+* Search Box: the query
+* Time Selector: time period to execute over (all time; last 2 weeks/1 week/day/hour/15 minutes; real-time windows)
+* Events: events matching the query; often truncated but expandable.  Matched fields are highlighted
+* Query Controls: manage slow queries, save queries/results, create alerts/dashboards/etc
+* Field locator: interact with extracted fields from events (defined per log)
+
+== Splunk Queries: fields
+
+
+A query can be as simple as a word or ID to search for.
+However, to help efficiency and find events pertinent to your application:
+
+*Application Fields*
+
+* `index=` specify the indexer queried (else hits all indexers - not polite)
+* `sourceType=` alias for a type of log file
+* `host=`   which machine the event belonged to
+* `source=` path to the log file
+
+(Specifying 1+ of these fields will help efficiency, accuracy)
+
+*Arbitrary Fields*
+
+Admins define other fields per type of log file
+
+* highly structured logs (such as access logs with timestamps, IP, URL, ...)
+* unstructured logs (such as Java error logs) have less fields
+
+
+== Splunk Queries: Transforming Data
+
+Search terms have implicit `AND` between them.
+User can change the join logic (such as `OR` and grouping terms.)
+Terms can include quoted literal terms `"this is my error"`
+
+Search commands can be piped together, especially for transformations.
+
+* calculations:  `eval velocity=distance/time`
+* RegEx extraction:  `rex field=_raw "From: (?<from>.*) To: (?<to>.*)"`
+* substitutions:  `lookup usertogroup user output group`
+* formatted data extraction:
+** XML Key-Value: `xmlkv` extracts keys as new fields
+** Structured Path: `spath [output=newField] path=commits.author.name`
+** XPath: `xpath outfield=name "//bar/@name"`
+* other text-based extractions (`split`, `substr`, ...)
+* stats functions (`count`, `avg`, `median`, `max`/`min`, ...)
+
+NOTE: while typing in a search, the UI will attempt to display relavant hints
+
+image::images/Splunk-searchHints.png[Splunk search hints]
+
+
+== Splunk Representations
+
+Sometimes you want summary data instead of the raw events or fields.
+
+*Tables*
+
+* http://docs.splunk.com/Documentation/Splunk/6.1.3/SearchReference/Table[table]
+** `index=webcms_cq sourcetype=webcms_pub_error Exception | rex "(?<exc>\S+Exception):" | table exc host source`
+** search for Exception, extract exception name into "exc", return a table of 3 columns
+* http://docs.splunk.com/Documentation/Splunk/6.1.3/SearchReference/Top[top]
+** `index=webcms_cq sourcetype=webcms_pub_error Exception | rex "(?<exc>\S+Exception):" | top exc [by host]`
+** Extract Exception names and show counts, percents by default (possible to hide the extra columns)
+** the `by host` inserts field "host" for finer-grained data
+
+*Charting* http://docs.splunk.com/Documentation/Splunk/6.1.3/Viz/Visualizationreference[Visualizations]
+
+* Bar charts, column (and stacked)
+* line charts (& stacked)
+* pie charts
+* scatter
+* single values
+* guages (radial, filler, marker)
+* maps (typically from `geostats` command)
+
+* http://docs.splunk.com/Documentation/Splunk/6.1.3/SearchReference/Chart[chart]
+* http://docs.splunk.com/Documentation/Splunk/6.1.3/SearchReference/Timechart[timechart]
+
+
+== Optimizing Searches
+
+(Based on Splunk's Quick Reference Guide)
+
+* make searches as specific as possible (eg `fatal_error`, not `*error*`)
+* limit time range (eg `-1h` instead of `-1w`)
+* filter out unneeded fields asap
+* filter out results before calculations
+* prefer "Advanced Charting" view over "Flashtimeline" (which calculates timelines)
+* in Flashtimeline, turn off "Discover Fields" when not needed
+* use summary indexes to pre-calculate commonly used values
+* make disk I/O the fastest available
+
+
+== Advanced Splunk: Alerts
+
+
+image::images/Splunk-alertFromSearch.png[create alert from search]
+image::images/Splunk-alertDetails.png[alert details from manager, role="right"]
+
+Alert from Manager (Searches & Reports.Manage Searches & Reports, filter & select alert):
+
+
+* search, time range
+* description
+* schedule (cron vs basic: every week, day, _n_ hours, _m_ minutes)
+* Condition: (always, \# events, \# hosts, \# sources, custom condition)
+* Alert mode: (per search vs per result)
+* Throttling, Expiration, Severity
+* Actions: email (subject, comma-separated addresses)
+* Results: in email (inline, CSV, PDF)
+* RSS feed
+* trigger script
+* ...
+
+
+
+== Advanced Splunk: Dashboards
+
+(if permissions) Dashboards & Views.{dashboard name}, Edit:on
+
+* panels
+** search with optional visualization/charting
+** edit search:
+**** search string or saved search
+**** time range
+** edit visualization
+** delete panel
+** _can be stacked horizontally, but changes to vertical stack in PDFs_
+* edit XML (handy for editing dashboard as a whole or "dumping" the dashboard)
+* edit permissions
+
+TIP: if dashboard is scheduled (ie email distribution), then ensure each search completes in less than a minute.
+
+
+== Splunk in Practice
+
+* http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/flashtimeline?s=%2FservicesNS%2Fnobody%2Fsearch%2Fsaved%2Fsearches%2FCQ5%2520Top%2520Publish%2520Exceptions[CQ5 Top Publish Exceptions]
+** Exploration query: what is happening
+** Killed exception #1: `IllegalStateException: page needs a session` (was up to 85% of old exceptions)
+** Can focus on most frequent exceptions
+** or focus on rare, but "shouldn't happen" ones
+* http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/webcms_real_time_traffic[Webcms Real Time Traffic]
+** "Load Balancer View" (used during deploys to watch traffic across all nodes)
+** image::images/Splunk-trafficDashboard.png[live traffic across apaches, dispatchers]
+* http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/webcms_checkout[Webcms Checkout - last 24 hours]
+** image::images/Splunk-CheckoutDashboard.png[specific errors grouped]
+** scheduled daily email to our business groups
+** iterated with business, including breaking out certain errors & time-frame
+* walk through recent slow-downs

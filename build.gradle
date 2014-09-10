@@ -1,0 +1,53 @@
+// You will need the VFS plugin
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.0'
+        classpath 'org.ysb33r.gradle:vfs-gradle-plugin:0.5'
+        classpath 'commons-httpclient:commons-httpclient:3.1'
+    }
+}
+
+apply plugin: 'vfs' // NOTE: We still using old-style. From 0.6+ this will be org.ysb33r.vfs.
+apply plugin: 'org.asciidoctor.gradle.asciidoctor'
+
+ext {
+    asciidoctorBackendVersion = '1.5.0'
+    downloadDir = new File(buildDir,'downloads')
+    templateDir = new File(downloadDir,'asciidoctor-backends')
+    deckjsDir   = new File(downloadDir,'deck.js')
+    outDir      = new File(buildDir,'slides')
+}
+
+// We create special download task to pull from github
+task download << {
+    mkdir downloadDir
+    vfs {
+        cp "zip:https://github.com/asciidoctor/asciidoctor-backends/archive/asciidoctor-v${asciidoctorBackendVersion}.zip!asciidoctor-backends-asciidoctor-v${asciidoctorBackendVersion}",
+                templateDir, recursive:true, overwrite:true
+        cp "zip:https://github.com/imakewebthings/deck.js/archive/master.zip!deck.js-master",
+                deckjsDir, recursive:true, overwrite:true
+    }
+}
+
+// Asciidoctor task needs to know where deck.js template is located
+asciidoctor {
+    backends = ['html5']
+    options = [
+        'template_dir' : "${projectDir}/external/asciidoctor-backends/haml/deckjs",
+    ]
+    outputDir = outDir
+}
+
+// Completed slide deck needs to have deck.js included
+asciidoctor.dependsOn 'copyDeckJs'
+
+task copyDeckJs( type : Copy ) {
+    from ('build/downloads') {
+        include 'deck.js/**'
+    }
+    into outDir
+}

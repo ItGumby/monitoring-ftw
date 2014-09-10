@@ -1,0 +1,7 @@
+.DS_Store
+*.html
+*.lock
+
+## directories to ignore
+build
+.gradle
