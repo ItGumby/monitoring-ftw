@@ -1,13 +1,5 @@
 = Monitoring FTW
 :author: Brian Street
-:backend: deckjs
-:deckjs_theme: web-2.0
-:deckjs_transition: horizontal-slide
-:navigation:
-:goto:
-:menu:
-:status:
-:icons: font
 :github: pass:[<i class="fa fa-github"></i>]
 :twitter: pass:[<i class="fa fa-twitter"></i>]
 :source-hightlighter: CodeRay
@@ -35,7 +27,7 @@
 
 == Introduction
 
-image::images/https://avatars3.githubusercontent.com/u/1299690?s=460[GitHub Avatar]
+image::itgumby.jpeg[GitHub Avatar]
 
 Brian Street (https://github.com/ItGumby[{github}ItGumby] https://twitter.com/ItGumby[{twitter}ItGumby])
 
@@ -117,7 +109,7 @@ forwarder -> indexer -> search head
 * *License Server* authorizes indexers, search heads
 * Can run locally! http://www.splunk.com/download[Splunk Downloads]
 
-image::images/Splunk-topology.png[Splunk topology]
+image::Splunk-topology.png[Splunk topology]
 
 == Basic Splunk Concepts
 
@@ -134,7 +126,7 @@ image::images/Splunk-topology.png[Splunk topology]
 
 == Basic Splunk: Interface
 
-image::images/Splunk-UI.png[Splunk Interface]
+image::Splunk-UI.png[Splunk Interface]
 
 * Search Box: the query
 * Time Selector: time period to execute over (all time; last 2 weeks/1 week/day/hour/15 minutes; real-time windows)
@@ -185,7 +177,7 @@ Search commands can be piped together, especially for transformations.
 
 NOTE: while typing in a search, the UI will attempt to display relavant hints
 
-image::images/Splunk-searchHints.png[Splunk search hints]
+image::Splunk-searchHints.png[Splunk search hints]
 
 
 == Splunk Visualizations
@@ -233,8 +225,8 @@ http://docs.splunk.com/Documentation/Splunk/6.1.3/Viz/Visualizationreference[*Ch
 == Advanced Splunk: Alerts
 
 
-image::images/Splunk-alertFromSearch.png[create alert from search]
-image::images/Splunk-alertDetails.png[alert details from manager, role="right"]
+image::Splunk-alertFromSearch.png[create alert from search]
+image::Splunk-alertDetails.png[alert details from manager, role="right"]
 
 Alert from Manager (Searches & Reports.Manage Searches & Reports, filter & select alert):
 
@@ -280,9 +272,9 @@ TIP: if dashboard is scheduled (ie email distribution), then ensure each search 
 ** or focus on rare, but "shouldn't happen" ones
 * http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/webcms_real_time_traffic[Webcms Real Time Traffic]
 ** "Load Balancer View" (used during deploys to watch traffic across all nodes)
-** image::images/Splunk-trafficDashboard.png[live traffic across apaches, dispatchers]
+** image::Splunk-trafficDashboard.png[live traffic across apaches, dispatchers]
 * http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/webcms_checkout[Webcms Checkout - last 24 hours]
-** image::images/Splunk-CheckoutDashboard.png[specific errors grouped]
+** image::Splunk-CheckoutDashboard.png[specific errors grouped]
 ** scheduled daily email to our business groups
 ** iterated with business, including breaking out certain errors & time-frame
 * walk through recent slow-downs
