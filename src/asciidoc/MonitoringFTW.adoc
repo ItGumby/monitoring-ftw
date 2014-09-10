@@ -132,7 +132,7 @@ image::Splunk-UI.png[Splunk Interface]
 * Query Controls: manage slow queries, save queries/results, create alerts/dashboards/etc
 * Field locator: interact with extracted fields from events (defined per log)
 
-== Splunk Queries: fields
+== Splunk Search: fields
 
 
 A query can be as simple as a word or ID to search for.
@@ -178,7 +178,7 @@ NOTE: while typing in a search, the UI will attempt to display relavant hints
 image::Splunk-searchHints.png[Splunk search hints]
 
 
-== Splunk Visualizations
+== Splunk Visualizations: Tables
 
 Sometimes you want summary data instead of the raw events or fields.
 
@@ -191,6 +191,9 @@ Sometimes you want summary data instead of the raw events or fields.
 ** `index=webcms_cq sourcetype=webcms_pub_error Exception | rex "(?<exc>\S+Exception):" | top exc [by host]`
 ** Extract Exception names and show counts, percents by default (possible to hide the extra columns)
 ** the `by host` inserts field "host" for finer-grained data
+
+
+== Splunk Visualizations: Charts
 
 http://docs.splunk.com/Documentation/Splunk/6.1.3/Viz/Visualizationreference[*Charting* Visualizations]
 
@@ -208,7 +211,7 @@ http://docs.splunk.com/Documentation/Splunk/6.1.3/Viz/Visualizationreference[*Ch
 
 == Optimizing Searches
 
-(Based on Splunk's Quick Reference Guide)
+(Based on Splunk's http://www.splunk.com/web_assets/pdfs/secure/Splunk_Quick_Reference_Guide.pdf[Quick Reference Guide])
 
 * make searches as specific as possible (eg `fatal_error`, not `\*error*`)
 * limit time range (eg `-1h` instead of `-1w`)
@@ -273,10 +276,11 @@ image::Splunk-trafficDashboard.png[live traffic across apaches, dispatchers]
 
 * http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/flashtimeline?s=%2FservicesNS%2Fnobody%2Fsearch%2Fsaved%2Fsearches%2FCQ5%2520Top%2520Publish%2520Exceptions[CQ5 Top Publish Exceptions]
 ** Exploration query: what is happening
-** Killed exception #1: `IllegalStateException: page needs a session` (was up to 85% of old exceptions)
 ** Can focus on most frequent exceptions
 ** or focus on rare, but "shouldn't happen" ones
-
+** Killed exception #1: `IllegalStateException: page needs a session` (was up to 85% of old exceptions)
+** link:images/splunk-report-2014-06-28.pdf[JUN-28 emailed exceptions]
+** link:images/splunk-report-2014-09-06.pdf[SEP-06 emailed exceptions]
 
 == Splunk in Practice: Checkout Error Dashboard
 
