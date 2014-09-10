@@ -15,11 +15,11 @@ apply plugin: 'vfs' // NOTE: We still using old-style. From 0.6+ this will be or
 apply plugin: 'org.asciidoctor.gradle.asciidoctor'
 
 ext {
-    asciidoctorBackendVersion = '1.5.0'
+    asciidoctorBackendVersion = '0.1.4'
     downloadDir = new File(buildDir,'downloads')
     templateDir = new File(downloadDir,'asciidoctor-backends')
     deckjsDir   = new File(downloadDir,'deck.js')
-    outDir      = new File(buildDir,'slides')
+    outDir      = new File('docs')
 }
 
 // We create special download task to pull from github
@@ -35,17 +35,30 @@ task download << {
 
 // Asciidoctor task needs to know where deck.js template is located
 asciidoctor {
+    sourceDir = new File('src/asciidoc')
+    outputDir = outDir
     backends = ['html5']
+
     options = [
-        'template_dir' : "${projectDir}/external/asciidoctor-backends/haml/deckjs",
-        'template_engine' : 'haml',
-        'header_footer' : true,
-        'attributes' : [
-            'imagesdir' : new File(buildDir, 'resources/images'),
-            'customcss' : new File(buildDir, 'resources/custom.css')
+        template_dirs : ["${projectDir}/asciidoctor-backends/haml".toString()],
+        attributes : [
+            'imagesdir' : new File(buildDir, 'src/images'),
+            'source-highligher': 'coderay',
+            'deckjs_theme': 'web-2.0', // 'web-2.0' , 'swiss', 'neon'
+            'deckjs_transition': 'horizontal-slide', // 'fade', 'horizontal-slide' , 'vertical-slide'
+            'navigation':'',
+            'goto':'',
+            'menu':'',
+            'status':'',
+            'split':'',
+            'blank':'',
+            'icons':'font',
+            //'customcss': 'css/custom.css',
+            'viewport': 'width=1000, user-scalable=yes',
+            'sectids!': '',
+            'showtitle':''
         ]
     ]
-    outputDir = outDir
 }
 
 // Completed slide deck needs to have deck.js included
