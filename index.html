@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+<meta content="Asciidoctor 1.5.0" name="generator" />
+<meta content="Brian Street" name="author" />
+<title>Monitoring FTW</title>
+<link href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet" />
+<style>
+.conum { display: inline-block; color: white !important; background-color: #222222; -webkit-border-radius: 100px; border-radius: 100px; text-align: center; width: 1.2em; height: 1.2em; font-size: 0.9em; font-weight: bold; line-height: 1.2; font-family: Arial, sans-serif; font-style: normal; position: relative; top: -0.1em; }
+.conum * { color: white !important; }
+.conum + b { display: none; }
+.conum:after { content: attr(data-value); }
+.conum:not([data-value]):empty { display: none; }
+.colist table td:first-of-type { padding-right: 0.25em; }
+</style>
+<link href="deck.js/core/deck.core.css" rel="stylesheet" />
+<link href="deck.js/extensions/scale/deck.scale.css" media="screen" rel="stylesheet" />
+<link href="deck.js/extensions/goto/deck.goto.css" media="screen" rel="stylesheet" />
+<link href="deck.js/extensions/menu/deck.menu.css" media="screen" rel="stylesheet" />
+<link href="deck.js/extensions/navigation/deck.navigation.css" media="screen" rel="stylesheet" />
+<link href="deck.js/extensions/status/deck.status.css" media="screen" rel="stylesheet" />
+<link href="deck.js/themes/style/web-2.0.css" media="screen" rel="stylesheet" />
+<link href="deck.js/themes/transition/horizontal-slide.css" media="screen" rel="stylesheet" />
+<link href="deck.js/core/print.css" media="print" rel="stylesheet" />
+<script src="deck.js/modernizr.custom.js"></script>
+</head>
+<body class="article">
+<div class="deck-container">
+<section class="slide" id="title-slide">
+<h1>Monitoring FTW</h1>
+<span id="author">Brian Street</span>
+<br />
+</section>
+<section class="slide">
+<h2>Agenda</h2>
+<div class="ulist">
+<ul>
+<li>What is Monitoring?</li>
+<li><p>
+Tools<div class="ulist">
+<ul>
+<li>Unix text tools</li>
+<li>AppDynamics (instrumented java: cross app/aggregate)</li>
+<li>Splunk (unified log scraping)</li>
+</ul>
+</div></p></li>
+<li><p>
+Basic Splunk<div class="ulist">
+<ul>
+<li>Concepts</li>
+<li>Topology</li>
+<li>Search Interface</li>
+<li>Search fields</li>
+<li>Transforming Data</li>
+<li>Visualizations (events vs tables/charts/etc)</li>
+<li>recommended optimizations</li>
+</ul>
+</div></p></li>
+<li><p>
+Advanced Splunk<div class="ulist">
+<ul>
+<li>Alerts</li>
+<li>Dashboards</li>
+</ul>
+</div></p></li>
+<li>Splunk in Practice</li>
+</ul>
+</div>
+</section>
+<section class="slide">
+<h2>Introduction</h2>
+<div class="imageblock">
+<div class="content">
+<img alt="GitHub Avatar" src="https://avatars3.githubusercontent.com/u/1299690?s=460" />
+</div>
+</div>
+<div class="paragraph"><p>Brian Street (<a href="https://github.com/ItGumby"><i class="fa fa-github"></i>ItGumby</a> <a href="https://twitter.com/ItGumby"><i class="fa fa-twitter"></i>ItGumby</a>)</p></div>
+<div class="ulist">
+<ul>
+<li><p>
+Full Stack Developer on <a class="bare" href="http://www.timewarnercable.com">http://www.timewarnercable.com</a> (Alexa Top 3000 and climbing)<div class="ulist">
+<ul>
+<li>Residential Phase 1: insource main site to new CMS &amp; design</li>
+<li>Contributed to push for RWD (Responsive Web Design - same content, multiple devices)</li>
+<li>EBF Buyflow: insource existing online ordering</li>
+<li>ABF Buyflow: extend online orders to potential new users</li>
+<li>Applying lessons from previous projects to new ones</li>
+</ul>
+</div></p></li>
+<li>flexible engineer with a passion for automation</li>
+<li>other tech interests: ETL, Databases, (Automated) QA, and Motion Control/robotics</li>
+</ul>
+</div>
+</section>
+<section class="slide">
+<h2>What is Monitoring</h2>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<a href="http://www.merriam-webster.com/dictionary/monitor">monitor</a> (verb) "to watch, observe, listen to or check (something) for a <strong>special purpose</strong> over a period of time"
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<ul>
+<li>Is it [app, server, &#8230;&#8203;] working?</li>
+<li>Automate the boring parts of your jobs away</li>
+<li>Is it possible to catch __ ahead of time?</li>
+<li><p>
+Business Buzzwords<div class="ulist">
+<ul>
+<li>"machine data"</li>
+<li>"operational intelligence"</li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+MIP (Monitoring Implementation Plan)
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<ul>
+<li><p>
+Where to start: "Get centralized logging."<div class="ulist">
+<ul>
+<li>Pay attention to where <em>your</em> constraints tend to be</li>
+<li>Only alert on actionable items (to prevent alert fatigue)</li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+</section>
+<section class="slide">
+<h2>Developer Perspective</h2>
+<div class="ulist">
+<ul>
+<li>Look for expected events (or their absense)</li>
+<li>Exploring for unexpected events</li>
+<li><p>
+Analyze "shapes" of events<div class="ulist">
+<ul>
+<li>grouping vs even distribution</li>
+<li>frequent vs rare</li>
+<li>Correlations with other events</li>
+</ul>
+</div></p></li>
+<li>Sanity check external metrics &amp; analytics</li>
+<li><p>
+Prioritize code effort<div class="ulist">
+<ul>
+<li>How is code behaving?</li>
+<li>How is code performing?</li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+</section>
+<section class="slide">
+<h2>Tools in use</h2>
+<div class="ulist">
+<ul>
+<li><p>
+Unix text tools<div class="ulist">
+<ul>
+<li>ie <code>grep</code>, <code>sed</code>, <code>awk</code></li>
+<li>very capable, but require understanding, effort</li>
+<li>better at single files, instances</li>
+</ul>
+</div></p></li>
+<li><p>
+<strong>AppDynamics</strong><div class="ulist">
+<ul>
+<li>"monitoring by instrumented java"</li>
+<li>Business Transactions</li>
+<li>Aggregate Thresholds</li>
+<li>Excels at application boundaries (host &amp; JVM metrics, remote calls)</li>
+<li>Automatic Timing (of remote calls)</li>
+<li>Deeper inspection of sampled calls (randomly or triggered by condition)</li>
+<li><code>-javaagent:&#8230;&#8203;/javaagent.jar</code> &#8594; hosted AppDynamics server</li>
+<li>warning: Adobe Flash interface</li>
+</ul>
+</div></p></li>
+<li><p>
+<strong>Splunk</strong><div class="ulist">
+<ul>
+<li>"unified log scraping" (my words)</li>
+<li>any log file, any platform</li>
+<li>fowarder(s) &#8594; indexer(s) &#8594; search head</li>
+<li>TWC has licenses &amp; multiple instances</li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+</section>
+<section class="slide">
+<h2>Basic Splunk: Topology</h2>
+<div class="paragraph"><p>forwarder &#8594; indexer &#8594; search head</p></div>
+<div class="ulist">
+<ul>
+<li><strong>forwarder</strong> streams (log) files to (central) indexers</li>
+<li><p>
+<strong>indexer</strong> indexes data for optimized searching, especially over time<div class="ulist">
+<ul>
+<li>(I/O intensive)</li>
+<li>manage permissions based on index</li>
+<li>generally striped not mirrored</li>
+</ul>
+</div></p></li>
+<li><p>
+<strong>search head</strong> Provides UI<div class="ulist">
+<ul>
+<li>Runs queries against indexers.</li>
+<li>Data manipulations happen at search time (leaving indexed events alone)</li>
+</ul>
+</div></p></li>
+<li>Anticipate multiple forwarders &amp; indexers; Can have separate search heads.</li>
+<li><strong>License Server</strong> authorizes indexers, search heads</li>
+<li>Can run locally! <a href="http://www.splunk.com/download">Splunk Downloads</a></li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img alt="Splunk topology" src="images/Splunk-topology.png" />
+</div>
+</div>
+</section>
+<section class="slide">
+<h2>Basic Splunk Concepts</h2>
+<div class="ulist">
+<ul>
+<li>processing: index-time vs search-time (translate events only as needed)</li>
+<li>events: single entry of data</li>
+<li>fields: name/value pairs extracted from event data</li>
+<li>tags: aliases to field values</li>
+<li>eventtypes</li>
+<li>reports/dashboards</li>
+<li>apps</li>
+<li>permissions/users/roles</li>
+<li>transactions: group related events together for easier analysis</li>
+</ul>
+</div>
+</section>
+<section class="slide">
+<h2>Basic Splunk: Interface</h2>
+<div class="imageblock">
+<div class="content">
+<img alt="Splunk Interface" src="images/Splunk-UI.png" />
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>Search Box: the query</li>
+<li>Time Selector: time period to execute over (all time; last 2 weeks/1 week/day/hour/15 minutes; real-time windows)</li>
+<li>Events: events matching the query; often truncated but expandable.  Matched fields are highlighted</li>
+<li>Query Controls: manage slow queries, save queries/results, create alerts/dashboards/etc</li>
+<li>Field locator: interact with extracted fields from events (defined per log)</li>
+</ul>
+</div>
+</section>
+<section class="slide">
+<h2>Splunk Search: fields</h2>
+<div class="paragraph"><p>A query can be as simple as a word or ID to search for.
+However, to help efficiency and find events pertinent to your application:</p></div>
+<div class="paragraph"><p><strong>Application Fields</strong></p></div>
+<div class="ulist">
+<ul>
+<li><code>index=</code> specify the indexer queried (else hits all indexers - not polite)</li>
+<li><code>sourceType=</code> alias for a type of log file</li>
+<li><code>host=</code>   which machine the event belonged to</li>
+<li><code>source=</code> path to the log file</li>
+</ul>
+</div>
+<div class="paragraph"><p>(Specifying 1+ of these fields will help efficiency, accuracy)</p></div>
+<div class="paragraph"><p><strong>Arbitrary Fields</strong></p></div>
+<div class="paragraph"><p>Admins define other fields per type of log file</p></div>
+<div class="ulist">
+<ul>
+<li>highly structured logs (such as access logs with timestamps, IP, URL, &#8230;&#8203;)</li>
+<li>unstructured logs (such as Java error logs) have less fields</li>
+</ul>
+</div>
+</section>
+<section class="slide">
+<h2>Splunk Queries: Transforming Data</h2>
+<div class="paragraph"><p>Search terms have implicit <code>AND</code> between them.
+User can change the join logic (such as <code>OR</code> and grouping terms.)
+Terms can include quoted literal terms <code>"this is my error"</code></p></div>
+<div class="paragraph"><p>Search commands can be piped together, especially for transformations.</p></div>
+<div class="ulist">
+<ul>
+<li>calculations:  <code>eval velocity=distance/time</code></li>
+<li>RegEx extraction:  <code>rex field=_raw "From: (?&lt;from&gt;.<strong>) To: (?&lt;to&gt;.</strong>)"</code></li>
+<li>substitutions:  <code>lookup usertogroup user output group</code></li>
+<li><p>
+formatted data extraction:<div class="ulist">
+<ul>
+<li>XML Key-Value: <code>xmlkv</code> extracts keys as new fields</li>
+<li>Structured Path: <code>spath [output=newField] path=commits.author.name</code></li>
+<li>XPath: <code>xpath outfield=name "//bar/@name"</code></li>
+</ul>
+</div></p></li>
+<li>other text-based extractions (<code>split</code>, <code>substr</code>, &#8230;&#8203;)</li>
+<li>stats functions (<code>count</code>, <code>avg</code>, <code>median</code>, <code>max</code>/<code>min</code>, &#8230;&#8203;)</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="icon-note" title="Note"></i>
+</td>
+<td class="content">
+while typing in a search, the UI will attempt to display relavant hints
+</td>
+</tr>
+</table>
+</div>
+<div class="imageblock">
+<div class="content">
+<img alt="Splunk search hints" src="images/Splunk-searchHints.png" />
+</div>
+</div>
+</section>
+<section class="slide">
+<h2>Splunk Visualizations: Tables</h2>
+<div class="paragraph"><p>Sometimes you want summary data instead of the raw events or fields.</p></div>
+<div class="paragraph"><p><strong>Tables</strong></p></div>
+<div class="ulist">
+<ul>
+<li><p>
+<a href="http://docs.splunk.com/Documentation/Splunk/6.1.3/SearchReference/Table">table</a><div class="ulist">
+<ul>
+<li><code>index=webcms_cq sourcetype=webcms_pub_error Exception | rex "(?&lt;exc&gt;\S+Exception):" | table exc host source</code></li>
+<li>search for Exception, extract exception name into "exc", return a table of 3 columns</li>
+</ul>
+</div></p></li>
+<li><p>
+<a href="http://docs.splunk.com/Documentation/Splunk/6.1.3/SearchReference/Top">top</a><div class="ulist">
+<ul>
+<li><code>index=webcms_cq sourcetype=webcms_pub_error Exception | rex "(?&lt;exc&gt;\S+Exception):" | top exc [by host]</code></li>
+<li>Extract Exception names and show counts, percents by default (possible to hide the extra columns)</li>
+<li>the <code>by host</code> inserts field "host" for finer-grained data</li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+</section>
+<section class="slide">
+<h2>Splunk Visualizations: Charts</h2>
+<div class="paragraph"><p><a href="http://docs.splunk.com/Documentation/Splunk/6.1.3/Viz/Visualizationreference"><strong>Charting</strong> Visualizations</a></p></div>
+<div class="ulist">
+<ul>
+<li>Bar charts, column (and stacked)</li>
+<li>line charts (&amp; stacked)</li>
+<li>pie charts</li>
+<li>scatter</li>
+<li>single values</li>
+<li>guages (radial, filler, marker)</li>
+<li>maps (typically from <code>geostats</code> command)</li>
+<li><p>
+reference commands<div class="ulist">
+<ul>
+<li><a href="http://docs.splunk.com/Documentation/Splunk/6.1.3/SearchReference/Chart">chart</a></li>
+<li><a href="http://docs.splunk.com/Documentation/Splunk/6.1.3/SearchReference/Timechart">timechart</a></li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+</section>
+<section class="slide">
+<h2>Optimizing Searches</h2>
+<div class="paragraph"><p>(Based on Splunk&#8217;s <a href="http://www.splunk.com/web_assets/pdfs/secure/Splunk_Quick_Reference_Guide.pdf">Quick Reference Guide</a>)</p></div>
+<div class="ulist">
+<ul>
+<li>make searches as specific as possible (eg <code>fatal_error</code>, not <code>*error*</code>)</li>
+<li>limit time range (eg <code>-1h</code> instead of <code>-1w</code>)</li>
+<li>filter out unneeded fields asap</li>
+<li>filter out results before calculations</li>
+<li>prefer "Advanced Charting" view over "Flashtimeline" (which calculates timelines)</li>
+<li>in Flashtimeline, turn off "Discover Fields" when not needed</li>
+<li>use summary indexes to pre-calculate commonly used values</li>
+<li>make disk I/O the fastest available</li>
+</ul>
+</div>
+</section>
+<section class="slide">
+<h2>Advanced Splunk: Alerts</h2>
+<div class="imageblock">
+<div class="content">
+<img alt="create alert from search" src="images/Splunk-alertFromSearch.png" />
+</div>
+</div>
+<div class="imageblock right">
+<div class="content">
+<img alt="alert details from manager" src="images/Splunk-alertDetails.png" />
+</div>
+</div>
+<div class="paragraph"><p>Alert from Manager (Searches &amp; Reports.Manage Searches &amp; Reports, filter &amp; select alert):</p></div>
+<div class="ulist">
+<ul>
+<li>search, time range</li>
+<li>description</li>
+<li>schedule (cron vs basic: every week, day, <em>n</em> hours, <em>m</em> minutes)</li>
+<li>Condition: (always, \# events, \# hosts, \# sources, custom condition)</li>
+<li>Alert mode: (per search vs per result)</li>
+<li>Throttling, Expiration, Severity</li>
+<li>Actions: email (subject, comma-separated addresses)</li>
+<li>Results: in email (inline, CSV, PDF)</li>
+<li>RSS feed</li>
+<li>trigger script</li>
+<li>&#8230;&#8203;</li>
+</ul>
+</div>
+</section>
+<section class="slide">
+<h2>Advanced Splunk: Dashboards</h2>
+<div class="paragraph"><p>(if permissions) Dashboards &amp; Views.{dashboard name}, Edit:on</p></div>
+<div class="ulist">
+<ul>
+<li><p>
+panels<div class="ulist">
+<ul>
+<li>search with optional visualization/charting</li>
+<li><p>
+edit search:<div class="ulist">
+<ul>
+<li>search string or saved search</li>
+<li>time range</li>
+</ul>
+</div></p></li>
+<li>edit visualization</li>
+<li>delete panel</li>
+<li><em>can be stacked horizontally, but changes to vertical stack in PDFs</em></li>
+</ul>
+</div></p></li>
+<li>edit XML (handy for editing dashboard as a whole or "dumping" the dashboard)</li>
+<li>edit permissions</li>
+</ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+if dashboard is scheduled (ie email distribution), then ensure each search completes in less than a minute.
+</td>
+</tr>
+</table>
+</div>
+</section>
+<section class="slide">
+<h2>Splunk in Practice: Real-time traffic</h2>
+<div class="imageblock">
+<div class="content">
+<img alt="live traffic across apaches" src="images/Splunk-trafficDashboard.png" width="dispatchers" />
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>"Load Balancer View" (used during deploys to watch traffic across all nodes)</li>
+<li><a href="http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/webcms_real_time_traffic">Webcms Real Time Traffic</a></li>
+</ul>
+</div>
+</section>
+<section class="slide">
+<h2>Splunk in Practice: Top CQ5 Exceptions</h2>
+<div class="ulist">
+<ul>
+<li><p>
+<a href="http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/flashtimeline?s=%2FservicesNS%2Fnobody%2Fsearch%2Fsaved%2Fsearches%2FCQ5%2520Top%2520Publish%2520Exceptions">CQ5 Top Publish Exceptions</a><div class="ulist">
+<ul>
+<li>Exploration query: what is happening</li>
+<li>Can focus on most frequent exceptions</li>
+<li>or focus on rare, but "shouldn&#8217;t happen" ones</li>
+<li>Killed exception #1: <code>IllegalStateException: page needs a session</code> (was up to 85% of old exceptions)</li>
+<li><a href="images/splunk-report-2014-06-28.pdf">JUN-28 emailed exceptions</a></li>
+<li><a href="images/splunk-report-2014-09-06.pdf">SEP-06 emailed exceptions</a></li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+</section>
+<section class="slide">
+<h2>Splunk in Practice: Checkout Error Dashboard</h2>
+<div class="imageblock">
+<div class="content">
+<img alt="specific errors grouped" src="images/Splunk-CheckoutDashboard.jpg" />
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>scheduled daily email to our business groups</li>
+<li>iterated with business, including breaking out certain errors &amp; time-frame</li>
+<li><a href="http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/webcms_checkout">Webcms Checkout - last 24 hours</a></li>
+</ul>
+</div>
+</section>
+<section class="slide">
+<h2>Splunk in Practice: live demo</h2>
+<div class="paragraph"><p>(if wifi works)</p></div>
+<div class="ulist">
+<ul>
+<li><p>
+walk through recent slow-downs<div class="ulist">
+<ul>
+<li>blah</li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+</section>
+<div aria-role="navigation">
+<a class="deck-prev-link" href="#" title="Previous">&#8592;</a>
+<a class="deck-next-link" href="#" title="Next">&#8594;</a>
+</div>
+<p aria-role="status" class="deck-status">
+<span class="deck-status-current"></span>
+/
+<span class="deck-status-total"></span>
+</p>
+<form action="." class="goto-form" method="get">
+<label for="goto-slide">Go to Slide:</label>
+<input id="goto-slide" list="goto-datalist" name="slidenum" type="text" />
+<datalist id="goto-data-list"></datalist>
+<input type="submit" value="Go" />
+</form>
+</div>
+<script src="deck.js/jquery.min.js"></script>
+<script src="deck.js/core/deck.core.js"></script>
+<script src="deck.js/extensions/scale/deck.scale.js"></script>
+<script src="deck.js/extensions/blank/deck.blank.js"></script>
+<script src="deck.js/extensions/goto/deck.goto.js"></script>
+<script src="deck.js/extensions/menu/deck.menu.js"></script>
+<script src="deck.js/extensions/navigation/deck.navigation.js"></script>
+<script src="deck.js/extensions/status/deck.status.js"></script>
+<script type="text/javascript">
+  //<![CDATA[
+    (function($, deck, undefined) {
+      $.deck.defaults.keys['previous'] = [8, 33, 37, 39];
+      $.deck.defaults.keys['next'] = [13, 32, 34, 39];
+    
+      $.extend(true, $[deck].defaults, {
+          countNested: false
+      });
+    
+      $.deck('.slide');
+    })(jQuery, 'deck');
+  //]]>
+</script>
+<style type="text/css">
+  /*<![CDATA[*/
+    .slide.canvas-image {
+    -moz-background-size: cover;
+    -webkit-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    display: -moz-box;
+    display: -webkit-box;
+    display: -ms-box;
+    display: box;
+    -moz-box-orient: vertical;
+    -webkit-box-orient: vertical;
+    -ms-box-orient: vertical;
+    box-orient: vertical;
+    -moz-box-align: start;
+    -webkit-box-align: start;
+    -ms-box-align: start;
+    box-align: start;
+    -moz-box-pack: start;
+    -webkit-box-pack: start;
+    -ms-box-pack: start;
+    box-pack: start;}
+    
+    .bottom-left {
+      left: 1%;
+      bottom: 20%; }
+    
+    .top-left {
+      left: 1%;
+      top: 20%; }
+    
+    .bottom-right {
+      right: 1%;
+      bottom: 20%; }
+    
+    .top-right {
+      right: 1%;
+      top: 20%; }
+    
+    .center-up {
+      right: 50%;
+      top: 1%;
+    }
+    
+    .center-down {
+      right: 50%;
+      bottom: 1%;
+    }
+    .canvas-image .canvas-caption p {
+      text-align: center;
+      padding-top: 0;
+      padding: 0;
+      -moz-transform: none;
+      -webkit-transform: none;
+      -o-transform: none;
+      -ms-transform: none;
+      transform: none;
+      display: inline;
+      position: absolute;
+      background-color: rgba(0, 0, 0, 0.7);
+      font-weight: bold;
+      font-size: 58px;
+      -webkit-box-shadow: 2px 2px 2px #000;
+      -moz-box-shadow: 2px 2px 2px #000;
+      box-shadow: 2px 2px 2px #000;
+      padding: 1rem;
+      color: white; }
+    kbd.keyseq { color: #555555; }
+    kbd:not(.keyseq) {
+      display: inline-block;
+      color: #222222;
+      font-size: 0.7em;
+      line-height: 1.4;
+      background-color: #F7F7F7;
+      border: 1px solid #ccc;
+      -webkit-border-radius: 3px;
+      border-radius: 3px;
+      -webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 0 0 2px white inset;
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 0 0 2px white inset;
+      margin: -0.15em 0.15em 0 0.15em;
+      padding: 0.2em 0.6em;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    kbd kbd:first-child { margin-left: 0; }
+    kbd kbd:last-child { margin-right: 0; }
+  /*]]>*/
+</style>
+</body>
+</html>
