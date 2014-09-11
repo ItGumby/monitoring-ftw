@@ -269,12 +269,12 @@ TIP: if dashboard is scheduled (ie email distribution), then ensure each search 
 image::Splunk-trafficDashboard.png[live traffic across apaches, dispatchers]
 
 * "Load Balancer View" (used during deploys to watch traffic across all nodes)
-* http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/webcms_real_time_traffic[Webcms Real Time Traffic]
+* http://redacted.test/en-US/app/search/webcms_real_time_traffic[Webcms Real Time Traffic]
 
 
 == Splunk in Practice: Top CQ5 Exceptions
 
-* http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/flashtimeline?s=%2FservicesNS%2Fnobody%2Fsearch%2Fsaved%2Fsearches%2FCQ5%2520Top%2520Publish%2520Exceptions[CQ5 Top Publish Exceptions]
+* http://redacted.test/en-US/app/search/flashtimeline?s=%2FservicesNS%2Fnobody%2Fsearch%2Fsaved%2Fsearches%2FCQ5%2520Top%2520Publish%2520Exceptions[CQ5 Top Publish Exceptions]
 ** Exploration query: what is happening
 ** Can focus on most frequent exceptions
 ** or focus on rare, but "shouldn't happen" ones
@@ -288,12 +288,33 @@ image::Splunk-CheckoutDashboard.jpg[specific errors grouped]
 
 * scheduled daily email to our business groups
 * iterated with business, including breaking out certain errors & time-frame
-* http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/webcms_checkout[Webcms Checkout - last 24 hours]
+* http://redacted.test/en-US/app/search/webcms_checkout[Webcms Checkout - last 24 hours]
 
 
 == Splunk in Practice: live demo
 
-(if wifi works)
+=== narrow down time-range:
+`index=webcms_apache sourcetype=webcms_apache_access GET | timechart median(Microseconds)`
 
-* walk through recent slow-downs
-** blah
+image::Splunk-debugTimeRange.png[Narrow down timeline]
+
+=== Specific request types (html vs static css or images)
+`index=webcms_apache sourcetype=webcms_apache_access GET Status=200 | rex "GET (?<path>\S+)(?<ext>\.\w{2,4})(?<param>\?\S+)?" | table Microseconds path ext param`
+
+image::Splunk-debugExtVariability.png[still gap between average & median across types]
+
+=== Timechart average vs medians
+
+(Apache) `index=webcms_apache sourcetype=webcms_apache_access GET html Status=200 | timechart median(Microseconds), avg(Microseconds)`
+
+image::Splunk-timelineHtmlVariability.png[Successfull HTML requests on Apache]
+
+(publish) `sourcetype=webcms_pub_access GET html 200 | rex "HTTP.1.\d\" (?<code>\d{3}) (?<time>\d+)" | timechart median(time), avg(time)`
+
+image::Splunk-pubVarTimeRange.png[Successfull HTML requests on publish]
+
+=== Conclusion:
+
+Recently, we have put a focus on understanding sporadic sluggish responses.
+We know some requests still respond quickly, but the worst-case rapidly gets worse.
+Our latest theory is either bulk activation/replication or dispatcher flushes (more pages than needed).
