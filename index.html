@@ -23,6 +23,7 @@
 <link href="deck.js/extensions/status/deck.status.css" media="screen" rel="stylesheet" />
 <link href="deck.js/themes/style/web-2.0.css" media="screen" rel="stylesheet" />
 <link href="deck.js/themes/transition/horizontal-slide.css" media="screen" rel="stylesheet" />
+<link href="css/custom.css" rel="stylesheet" />
 <link href="deck.js/core/print.css" media="print" rel="stylesheet" />
 <script src="deck.js/modernizr.custom.js"></script>
 </head>
@@ -172,19 +173,18 @@ Prioritize code effort<div class="ulist">
 </div>
 </section>
 <section class="slide">
-<h2>Tools in use</h2>
+<h2>Tools in use: Unix text tools</h2>
 <div class="ulist">
-<ul>
-<li><p>
-Unix text tools<div class="ulist">
 <ul>
 <li>ie <code>grep</code>, <code>sed</code>, <code>awk</code></li>
 <li>very capable, but require understanding, effort</li>
 <li>better at single files, instances</li>
 </ul>
-</div></p></li>
-<li><p>
-<strong>AppDynamics</strong><div class="ulist">
+</div>
+</section>
+<section class="slide">
+<h2>Tools in use: <strong>AppDynamics</strong></h2>
+<div class="ulist">
 <ul>
 <li>"monitoring by instrumented java"</li>
 <li>Business Transactions</li>
@@ -195,16 +195,16 @@ Unix text tools<div class="ulist">
 <li><code>-javaagent:&#8230;&#8203;/javaagent.jar</code> &#8594; hosted AppDynamics server</li>
 <li>warning: Adobe Flash interface</li>
 </ul>
-</div></p></li>
-<li><p>
-<strong>Splunk</strong><div class="ulist">
+</div>
+</section>
+<section class="slide">
+<h2>Tools in use: <strong>Splunk</strong></h2>
+<div class="ulist">
 <ul>
 <li>"unified log scraping" (my words)</li>
 <li>any log file, any platform</li>
 <li>fowarder(s) &#8594; indexer(s) &#8594; search head</li>
 <li>TWC has licenses &amp; multiple instances</li>
-</ul>
-</div></p></li>
 </ul>
 </div>
 </section>
@@ -401,17 +401,18 @@ reference commands<div class="ulist">
 </section>
 <section class="slide">
 <h2>Advanced Splunk: Alerts</h2>
+<div class="paragraph"><p>Alert from Search (3 step wizard):</p></div>
 <div class="imageblock">
 <div class="content">
 <img alt="create alert from search" src="images/Splunk-alertFromSearch.png" />
 </div>
 </div>
+<div class="paragraph"><p>Alert from Manager (Searches &amp; Reports.Manage Searches &amp; Reports, filter &amp; select alert):</p></div>
 <div class="imageblock right">
 <div class="content">
 <img alt="alert details from manager" src="images/Splunk-alertDetails.png" />
 </div>
 </div>
-<div class="paragraph"><p>Alert from Manager (Searches &amp; Reports.Manage Searches &amp; Reports, filter &amp; select alert):</p></div>
 <div class="ulist">
 <ul>
 <li>search, time range</li>
@@ -476,7 +477,7 @@ if dashboard is scheduled (ie email distribution), then ensure each search compl
 <div class="ulist">
 <ul>
 <li>"Load Balancer View" (used during deploys to watch traffic across all nodes)</li>
-<li><a href="http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/webcms_real_time_traffic">Webcms Real Time Traffic</a></li>
+<li><a href="http://redacted.test/en-US/app/search/webcms_real_time_traffic">Webcms Real Time Traffic</a></li>
 </ul>
 </div>
 </section>
@@ -485,7 +486,7 @@ if dashboard is scheduled (ie email distribution), then ensure each search compl
 <div class="ulist">
 <ul>
 <li><p>
-<a href="http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/flashtimeline?s=%2FservicesNS%2Fnobody%2Fsearch%2Fsaved%2Fsearches%2FCQ5%2520Top%2520Publish%2520Exceptions">CQ5 Top Publish Exceptions</a><div class="ulist">
+<a href="http://redacted.test/en-US/app/search/flashtimeline?s=%2FservicesNS%2Fnobody%2Fsearch%2Fsaved%2Fsearches%2FCQ5%2520Top%2520Publish%2520Exceptions">CQ5 Top Publish Exceptions</a><div class="ulist">
 <ul>
 <li>Exploration query: what is happening</li>
 <li>Can focus on most frequent exceptions</li>
@@ -509,23 +510,55 @@ if dashboard is scheduled (ie email distribution), then ensure each search compl
 <ul>
 <li>scheduled daily email to our business groups</li>
 <li>iterated with business, including breaking out certain errors &amp; time-frame</li>
-<li><a href="http://splunk-web-01.lab.webapps.rr.com/en-US/app/search/webcms_checkout">Webcms Checkout - last 24 hours</a></li>
+<li><a href="http://redacted.test/en-US/app/search/webcms_checkout">Webcms Checkout - last 24 hours</a></li>
 </ul>
 </div>
 </section>
 <section class="slide">
 <h2>Splunk in Practice: live demo</h2>
-<div class="paragraph"><p>(if wifi works)</p></div>
-<div class="ulist">
-<ul>
-<li><p>
-walk through recent slow-downs<div class="ulist">
-<ul>
-<li>blah</li>
-</ul>
-</div></p></li>
-</ul>
+<section class="slide">
+<h2>narrow down time-range:</h2>
+<div class="paragraph"><p><code>index=webcms_apache sourcetype=webcms_apache_access GET | timechart median(Microseconds)</code></p></div>
+<div class="imageblock">
+<div class="content">
+<img alt="Narrow down timeline" src="images/Splunk-debugTimeRange.png" />
 </div>
+</div>
+</section>
+<section class="slide">
+<h2>Specific request types (html vs static css or images)</h2>
+<div class="paragraph"><p><code>index=webcms_apache sourcetype=webcms_apache_access GET Status=200 | rex "GET (?&lt;path&gt;\S+)(?&lt;ext&gt;\.\w{2,4})(?&lt;param&gt;\?\S+)?" | table Microseconds path ext param</code></p></div>
+<div class="imageblock">
+<div class="content">
+<img alt="still gap between average &amp; median across types" src="images/Splunk-debugExtVariability.png" />
+</div>
+</div>
+</section>
+<section class="slide">
+<h2>Timechart average vs medians</h2>
+<div class="paragraph"><p>(Apache) <code>index=webcms_apache sourcetype=webcms_apache_access GET html Status=200 | timechart median(Microseconds), avg(Microseconds)</code></p></div>
+<div class="imageblock">
+<div class="content">
+<img alt="Successfull HTML requests on Apache" src="images/Splunk-timelineHtmlVariability.png" />
+</div>
+</div>
+<div class="paragraph"><p>(publish) <code>sourcetype=webcms_pub_access GET html 200 | rex "HTTP.1.\d\" (?&lt;code&gt;\d{3}) (?&lt;time&gt;\d+)" | timechart median(time), avg(time)</code></p></div>
+<div class="imageblock">
+<div class="content">
+<img alt="Successfull HTML requests on publish" src="images/Splunk-pubVarTimeRange.png" />
+</div>
+</div>
+</section>
+<section class="slide">
+<h2>Conclusion:</h2>
+<div class="paragraph"><p>Recently, we have put a focus on understanding sporadic sluggish responses.
+We know some requests still respond quickly, but the worst-case rapidly gets worse.
+Our latest theory is either bulk activation/replication or dispatcher flushes (more pages than needed).</p></div>
+</section>
+</section>
+<section class="slide">
+<h2>Thank You</h2>
+<div class="paragraph"><p>Thank you for your time!</p></div>
 </section>
 <div aria-role="navigation">
 <a class="deck-prev-link" href="#" title="Previous">&#8592;</a>
