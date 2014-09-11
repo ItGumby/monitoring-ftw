@@ -53,7 +53,7 @@ asciidoctor {
             'status':'',
             'blank':'',
             'icons':'font',
-            //'customcss': 'css/custom.css',
+            'customcss': 'css/custom.css',
             //'viewport': 'width=1000, user-scalable=yes',
             'sectids!': '',
             'showtitle':''
@@ -62,12 +62,20 @@ asciidoctor {
 }
 
 // Completed slide deck needs to have deck.js included
-asciidoctor.dependsOn 'copyDeckJs'
 asciidoctor.dependsOn 'download'
+asciidoctor.dependsOn 'copyDeckJs'
+asciidoctor.dependsOn 'copyImages'
 
 task copyDeckJs( type : Copy ) {
     from (downloadDir) {
         include 'deck.js/**'
+    }
+    into outDir
+}
+task copyImages( type : Copy) {
+    from ('src') {
+        include 'images/**'
+        include 'css/**'
     }
     into outDir
 }

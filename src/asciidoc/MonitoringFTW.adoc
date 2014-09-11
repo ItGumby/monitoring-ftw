@@ -70,26 +70,29 @@ TIP: MIP (Monitoring Implementation Plan)
 ** How is code behaving?
 ** How is code performing?
 
-== Tools in use
+== Tools in use: Unix text tools
 
-* Unix text tools
-** ie `grep`, `sed`, `awk`
-** very capable, but require understanding, effort
-** better at single files, instances
-* *AppDynamics*
-** "monitoring by instrumented java"
-** Business Transactions
-** Aggregate Thresholds
-** Excels at application boundaries (host & JVM metrics, remote calls)
-** Automatic Timing (of remote calls)
-** Deeper inspection of sampled calls (randomly or triggered by condition)
-** `-javaagent:.../javaagent.jar` -> hosted AppDynamics server
-** warning: Adobe Flash interface
-* *Splunk*
-** "unified log scraping" (my words)
-** any log file, any platform
-** fowarder(s) -> indexer(s) -> search head
-** TWC has licenses & multiple instances
+* ie `grep`, `sed`, `awk`
+* very capable, but require understanding, effort
+* better at single files, instances
+
+== Tools in use: *AppDynamics*
+* "monitoring by instrumented java"
+* Business Transactions
+* Aggregate Thresholds
+* Excels at application boundaries (host & JVM metrics, remote calls)
+* Automatic Timing (of remote calls)
+* Deeper inspection of sampled calls (randomly or triggered by condition)
+* `-javaagent:.../javaagent.jar` -> hosted AppDynamics server
+* warning: Adobe Flash interface
+
+
+== Tools in use: *Splunk*
+
+* "unified log scraping" (my words)
+* any log file, any platform
+* fowarder(s) -> indexer(s) -> search head
+* TWC has licenses & multiple instances
 
 == Basic Splunk: Topology
 
@@ -225,12 +228,13 @@ http://docs.splunk.com/Documentation/Splunk/6.1.3/Viz/Visualizationreference[*Ch
 
 == Advanced Splunk: Alerts
 
+Alert from Search (3 step wizard):
 
 image::Splunk-alertFromSearch.png[create alert from search]
-image::Splunk-alertDetails.png[alert details from manager, role="right"]
 
 Alert from Manager (Searches & Reports.Manage Searches & Reports, filter & select alert):
 
+image::Splunk-alertDetails.png[alert details from manager, role="right"]
 
 * search, time range
 * description
@@ -243,7 +247,6 @@ Alert from Manager (Searches & Reports.Manage Searches & Reports, filter & selec
 * RSS feed
 * trigger script
 * ...
-
 
 
 == Advanced Splunk: Dashboards
@@ -318,3 +321,7 @@ image::Splunk-pubVarTimeRange.png[Successfull HTML requests on publish]
 Recently, we have put a focus on understanding sporadic sluggish responses.
 We know some requests still respond quickly, but the worst-case rapidly gets worse.
 Our latest theory is either bulk activation/replication or dispatcher flushes (more pages than needed).
+
+== Thank You
+
+Thank you for your time!
